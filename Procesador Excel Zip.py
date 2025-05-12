@@ -109,11 +109,6 @@ if st.session_state.zip_responsables:
         file_name="DatosPorResponsable.zip",
         mime="application/zip"
     )
-                        label="Descargar ZIP con Datos por Responsable",
-                        data=zip_buffer,
-                        file_name="DatosPorResponsable.zip",
-                        mime="application/zip"
-                    )
 
             st.subheader("Vista previa de DatosCombinados.xlsx")
             st.dataframe(df_combinado, use_container_width=True)
