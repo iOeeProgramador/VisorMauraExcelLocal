@@ -81,7 +81,7 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 st.dataframe(pivot_resp_estado, use_container_width=True)
 
                 if 'zip_responsables' not in st.session_state:
-    st.session_state.zip_responsables = None
+                    st.session_state.zip_responsables = None
 
 if st.button("Generar ZIP por Responsable"):
     zip_buffer = io.BytesIO()
