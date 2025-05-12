@@ -91,6 +91,7 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 df_combinado.to_excel(writer, index=False, sheet_name='Datos')
             output.seek(0)
 
+            if uploaded_file is not None:
             st.download_button(
                 label="Salir y descargar DatosCombinados.xlsx",
                 data=output,
@@ -123,5 +124,4 @@ elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
         st.subheader("Resumen Total de Líneas por Responsable y Estado")
         st.dataframe(pivot_resp_estado, use_container_width=True)
 
-else:
-    st.error("El archivo ORDENES.xlsx no fue encontrado en el ZIP.")
+
