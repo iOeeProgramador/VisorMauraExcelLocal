@@ -17,6 +17,7 @@ elif modo == "Revisar DatosCombinados.xlsx":
     uploaded_file = st.file_uploader("Carga tu archivo Excel DatosCombinados.xlsx", type="xlsx")
 
 if uploaded_file is not None and modo == "Actualizar con ZIP":
+    tab1, tab2, tab3 = st.tabs(["Vista previa", "Resumen por Responsable", "Resumen por Estado"])
     with zipfile.ZipFile(uploaded_file) as z:
         expected_files = ["ORDENES.xlsx", "INVENTARIO.xlsx", "ESTADO.xlsx", "PRECIOS.xlsx", "GESTION.xlsx"]
         file_dict = {name: z.open(name) for name in expected_files if name in z.namelist()}
@@ -66,8 +67,9 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 resumen["RESPONSABLE_GESTION"] = resumen["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
                 resumen = resumen.sort_values(by="Total Líneas", ascending=False)
                 total = resumen["Total Líneas"].sum()
-                st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
-                st.dataframe(resumen, use_container_width=True)
+                with tab2:
+        st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
+        st.dataframe(resumen, use_container_width=True)
 
             if "RESPONSABLE_GESTION" in df_combinado.columns and "ESTADO_ESTADO" in df_combinado.columns:
                 pivot_resp_estado = df_combinado.pivot_table(
@@ -77,41 +79,19 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                     fill_value=0
                 ).reset_index()
 
-                st.subheader("Resumen Total de Líneas por Responsable y Estado")
-                st.dataframe(pivot_resp_estado, use_container_width=True)
+                with tab3:
+        st.subheader("Resumen Total de Líneas por Responsable y Estado")
+        st.dataframe(pivot_resp_estado, use_container_width=True)
 
                 if 'zip_responsables' not in st.session_state:
                     st.session_state.zip_responsables = None
 
-if st.button("Generar ZIP por Responsable"):
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
-        responsables = df_combinado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE").unique()
-        for responsable in responsables:
-            df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
-            output_excel = io.BytesIO()
-            with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
-                df_responsable.to_excel(writer, index=False, sheet_name="Datos")
-            output_excel.seek(0)
-            import re
-            safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', str(responsable))
-            safe_name = f"{safe_name}_{datetime.today().strftime('%Y%m%d')}"
-            zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
 
-    zip_buffer.seek(0)
-    st.session_state.zip_responsables = zip_buffer.getvalue()
-    st.success("ZIP por responsable generado correctamente.")
-
-    if st.session_state.zip_responsables:
-            st.download_button(
-            label="Descargar ZIP con Datos por Responsable",
-        data=st.session_state.zip_responsables,
-        file_name="DatosPorResponsable.zip",
-        mime="application/zip"
-    )
-
-                st.subheader("Vista previa de DatosCombinados.xlsx")
-    st.dataframe(df_combinado, use_container_width=True)
+                
+                
+                with tab1:
+        st.subheader("Vista previa de DatosCombinados.xlsx")
+        st.dataframe(df_combinado, use_container_width=True)
 
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
