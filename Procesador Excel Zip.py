@@ -8,9 +8,53 @@ import re
 st.set_page_config(layout="wide")
 st.title("Procesador de archivos MIA")
 
-modo = st.radio("Selecciona el modo de operación:", ("Actualizar con ZIP", "Revisar DatosCombinados.xlsx"))
+modo = st.radio("Selecciona el modo de operación:", ("Actualizar con ZIP", "Revisar DatosCombinados.xlsx", "Actualizar desde Responsable"))
 
 st.write("✅ Cargando aplicación...")
+
+if modo == "Actualizar desde Responsable":
+    datos_file = st.file_uploader("Carga el archivo DatosCombinados.xlsx actual", type="xlsx", key="datos_file")
+    responsable_file = st.file_uploader("Carga el archivo Excel del Responsable actualizado", type="xlsx", key="responsable_file")
+
+    if datos_file and responsable_file:
+        df_combinado = pd.read_excel(datos_file)
+        df_update = pd.read_excel(responsable_file)
+
+        backup = io.BytesIO()
+        with pd.ExcelWriter(backup, engine='xlsxwriter') as writer:
+            df_combinado.to_excel(writer, index=False, sheet_name='Datos')
+        backup.seek(0)
+        st.download_button(
+            label="Descargar respaldo antes de la actualización",
+            data=backup,
+            file_name="Respaldo_DatosCombinados.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+        if "LORD_ORDENES" in df_update.columns and "LLINE_ORDENES" in df_update.columns:
+            df_update["KEY"] = df_update["LORD_ORDENES"].astype(str) + df_update["LLINE_ORDENES"].astype(str)
+            df_combinado["KEY"] = df_combinado["LORD_ORDENES"].astype(str) + df_combinado["LLINE_ORDENES"].astype(str)
+
+            df_combinado.set_index("KEY", inplace=True)
+            df_update.set_index("KEY", inplace=True)
+
+            for col in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
+                if col in df_update.columns:
+                    df_combinado.loc[df_update.index, col] = df_update[col]
+
+            df_combinado.reset_index(inplace=True)
+            st.success("Datos actualizados correctamente desde el archivo del responsable.")
+
+            output_actualizado = io.BytesIO()
+            with pd.ExcelWriter(output_actualizado, engine='xlsxwriter') as writer:
+                df_combinado.to_excel(writer, index=False, sheet_name='Datos')
+            output_actualizado.seek(0)
+            st.download_button(
+                label="Descargar DatosCombinados actualizado",
+                data=output_actualizado,
+                file_name="DatosCombinados_actualizado.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
 if modo == "Actualizar con ZIP":
     uploaded_file = st.file_uploader("Carga tu archivo ZIP con los libros de Excel", type="zip")
