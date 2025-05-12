@@ -81,9 +81,51 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 st.subheader("Resumen Total de Líneas por Responsable y Estado")
                 st.dataframe(pivot_resp_estado, use_container_width=True)
 
+    if st.button("Generar ZIP por Responsable"):
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
+            responsables = df_combinado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE").unique()
+            for responsable in responsables:
+                df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
+                output_excel = io.BytesIO()
+                with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
+                    df_responsable.to_excel(writer, index=False, sheet_name="Datos")
+                output_excel.seek(0)
+                safe_name = str(responsable).replace("/", "-").replace("\", "-")
+                zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
+
+        zip_buffer.seek(0)
+        st.download_button(
+            label="Descargar ZIP con Datos por Responsable",
+            data=zip_buffer,
+            file_name="DatosPorResponsable.zip",
+            mime="application/zip"
+        )
+
             
 
             st.subheader("Vista previa de DatosCombinados.xlsx")
+
+            if st.button("Generar ZIP por Responsable"):
+                zip_buffer = io.BytesIO()
+                with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
+                    responsables = df_combinado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE").unique()
+                    for responsable in responsables:
+                        df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
+                        output_excel = io.BytesIO()
+                        with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
+                            df_responsable.to_excel(writer, index=False, sheet_name="Datos")
+                        output_excel.seek(0)
+                        safe_name = str(responsable).replace("/", "-").replace("\", "-")
+                        zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
+
+                zip_buffer.seek(0)
+                st.download_button(
+                    label="Descargar ZIP con Datos por Responsable",
+                    data=zip_buffer,
+                    file_name="DatosPorResponsable.zip",
+                    mime="application/zip"
+                )
             st.dataframe(df_combinado, use_container_width=True)
 
             output = io.BytesIO()
