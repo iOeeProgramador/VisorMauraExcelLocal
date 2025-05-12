@@ -94,6 +94,15 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                                 df_responsable.to_excel(writer, index=False, sheet_name="Datos")
                             worksheet = writer.sheets["Datos"]
                             unlocked_format = writer.book.add_format({"locked": False})
+                            locked_red = writer.book.add_format({"locked": True, "bg_color": "#F4CCCC"})
+                            for idx, col in enumerate(df_responsable.columns):
+                                if col in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
+                                    worksheet.set_column(idx, idx, None, unlocked_format)
+                                else:
+                                    worksheet.set_column(idx, idx, None, locked_red)
+                            worksheet.protect("", options={"format_cells": False})
+                            worksheet = writer.sheets["Datos"]
+                            unlocked_format = writer.book.add_format({"locked": False})
                             for idx, col in enumerate(df_responsable.columns):
                                 if col in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
                                     worksheet.set_column(idx, idx, None, unlocked_format)
