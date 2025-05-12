@@ -91,7 +91,21 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                             df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
                             output_excel = io.BytesIO()
                             with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
-                            df_responsable.to_excel(writer, index=False, sheet_name="Datos")
+                                df_responsable.to_excel(writer, index=False, sheet_name="Datos")
+                                worksheet = writer.sheets["Datos"]
+                                workbook = writer.book
+                                unlocked_format = workbook.add_format({"locked": False})
+                                locked_red_format = workbook.add_format({"locked": True, "bg_color": "#F4CCCC"})
+                                for col_idx, col_name in enumerate(df_responsable.columns):
+                                    col_letter = chr(65 + col_idx)
+                                    col_range = f"{col_letter}2:{col_letter}{len(df_responsable)+1}"
+                                    if col_name in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
+                                        worksheet.write_blank(col_range, None, unlocked_format)
+                                        worksheet.set_column(col_idx, col_idx, None, unlocked_format)
+                                    else:
+                                        worksheet.write_blank(col_range, None, locked_red_format)
+                                        worksheet.set_column(col_idx, col_idx, None, locked_red_format)
+                                worksheet.protect("", options={"format_cells": False})
                             worksheet = writer.sheets["Datos"]
                             workbook = writer.book
                             unlocked_format = workbook.add_format({"locked": False})
