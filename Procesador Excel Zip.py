@@ -177,6 +177,18 @@ elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
 
     if update_file:
         df_update = pd.read_excel(update_file)
+
+        # Guardar respaldo de DatosCombinados antes de actualizar
+        backup = io.BytesIO()
+        with pd.ExcelWriter(backup, engine='xlsxwriter') as writer:
+            df_combinado.to_excel(writer, index=False, sheet_name='Datos')
+        backup.seek(0)
+        st.download_button(
+            label="Descargar respaldo antes de la actualización",
+            data=backup,
+            file_name="Respaldo_DatosCombinados.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
         if "LORD_ORDENES" in df_update.columns and "LLINE_ORDENES" in df_update.columns:
             df_update["KEY"] = df_update["LORD_ORDENES"].astype(str) + df_update["LLINE_ORDENES"].astype(str)
             df_combinado["KEY"] = df_combinado["LORD_ORDENES"].astype(str) + df_combinado["LLINE_ORDENES"].astype(str)
