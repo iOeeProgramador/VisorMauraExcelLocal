@@ -105,7 +105,7 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                                     else:
                                         worksheet.write_blank(col_range, None, locked_red_format)
                                         worksheet.set_column(col_idx, col_idx, None, locked_red_format)
-                                worksheet.protect("", options={"format_cells": False})
+                                worksheet.protect("", options={"format_cells": True, "sort": True, "autofilter": True})
                             worksheet = writer.sheets["Datos"]
                             workbook = writer.book
                             unlocked_format = workbook.add_format({"locked": False})
