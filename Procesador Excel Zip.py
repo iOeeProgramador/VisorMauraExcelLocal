@@ -78,9 +78,9 @@ if uploaded_file is not None:
                 st.dataframe(resumen_estado, use_container_width=True)
 
             st.write("🧪 Columnas disponibles en df_combinado:")
-st.write(df_combinado.columns.tolist())
+            st.write(df_combinado.columns.tolist())
 
-st.subheader("Vista previa de DatosCombinados.xlsx")
+            st.subheader("Vista previa de DatosCombinados.xlsx")
             st.dataframe(df_combinado, use_container_width=True)
 
             output = io.BytesIO()
