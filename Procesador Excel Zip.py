@@ -93,6 +93,10 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                             with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
                                 df_responsable.to_excel(writer, index=False, sheet_name="Datos")
                                 worksheet = writer.sheets["Datos"]
+                                for col_num, _ in enumerate(df_responsable.columns):
+                                    worksheet.set_column(col_num, col_num, 20, writer.book.add_format({"align": "center", "valign": "vcenter"}))
+                                worksheet.autofilter(0, 0, len(df_responsable), len(df_responsable.columns) - 1)
+                                worksheet = writer.sheets["Datos"]
                                 workbook = writer.book
                                 unlocked_format = workbook.add_format({"locked": False})
                                 locked_red_format = workbook.add_format({"locked": True, "bg_color": "#F4CCCC"})
@@ -168,6 +172,24 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                     st.dataframe(pivot_resp_estado, use_container_width=True)
 
 elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
+    st.info("También puedes cargar un archivo Excel de un Responsable para actualizar DatosCombinados")
+    update_file = st.file_uploader("Cargar archivo de Responsable actualizado", type="xlsx", key="update")
+
+    if update_file:
+        df_update = pd.read_excel(update_file)
+        if "LORD_ORDENES" in df_update.columns and "LLINE_ORDENES" in df_update.columns:
+            df_update["KEY"] = df_update["LORD_ORDENES"].astype(str) + df_update["LLINE_ORDENES"].astype(str)
+            df_combinado["KEY"] = df_combinado["LORD_ORDENES"].astype(str) + df_combinado["LLINE_ORDENES"].astype(str)
+
+            df_combinado.set_index("KEY", inplace=True)
+            df_update.set_index("KEY", inplace=True)
+
+            for col in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
+                if col in df_update.columns:
+                    df_combinado.loc[df_update.index, col] = df_update[col]
+
+            df_combinado.reset_index(inplace=True)
+            st.success("Datos actualizados correctamente desde el archivo del responsable.")
     df_combinado = pd.read_excel(uploaded_file)
     tab1, tab2, tab3 = st.tabs(["Vista previa", "Resumen por Responsable", "Resumen por Estado"])
 
