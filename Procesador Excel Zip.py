@@ -7,11 +7,16 @@ from datetime import datetime
 st.set_page_config(layout="wide")
 st.title("Procesador de archivos MIA")
 
+modo = st.radio("Selecciona el modo de operación:", ("Actualizar con ZIP", "Revisar DatosCombinados.xlsx"))
+
 st.write("✅ Cargando aplicación...")
 
-uploaded_file = st.file_uploader("Carga tu archivo ZIP con los libros de Excel", type="zip")
+if modo == "Actualizar con ZIP":
+    uploaded_file = st.file_uploader("Carga tu archivo ZIP con los libros de Excel", type="zip")
+elif modo == "Revisar DatosCombinados.xlsx":
+    uploaded_file = st.file_uploader("Carga tu archivo Excel DatosCombinados.xlsx", type="xlsx")
 
-if uploaded_file is not None:
+if uploaded_file is not None and modo == "Actualizar con ZIP":
     with zipfile.ZipFile(uploaded_file) as z:
         expected_files = ["ORDENES.xlsx", "INVENTARIO.xlsx", "ESTADO.xlsx", "PRECIOS.xlsx", "GESTION.xlsx"]
         file_dict = {name: z.open(name) for name in expected_files if name in z.namelist()}
@@ -93,5 +98,30 @@ if uploaded_file is not None:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-        else:
-            st.error("El archivo ORDENES.xlsx no fue encontrado en el ZIP.")
+        elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
+    df_combinado = pd.read_excel(uploaded_file)
+
+    st.subheader("Vista previa de DatosCombinados.xlsx")
+    st.dataframe(df_combinado, use_container_width=True)
+
+    if "RESPONSABLE_GESTION" in df_combinado.columns:
+        resumen = df_combinado.groupby("RESPONSABLE_GESTION", dropna=False).size().reset_index(name="Total Líneas")
+        resumen["RESPONSABLE_GESTION"] = resumen["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
+        resumen = resumen.sort_values(by="Total Líneas", ascending=False)
+        total = resumen["Total Líneas"].sum()
+        st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
+        st.dataframe(resumen, use_container_width=True)
+
+    if "RESPONSABLE_GESTION" in df_combinado.columns and "ESTADO_ESTADO" in df_combinado.columns:
+        pivot_resp_estado = df_combinado.pivot_table(
+            index="RESPONSABLE_GESTION",
+            columns="ESTADO_ESTADO",
+            aggfunc="size",
+            fill_value=0
+        ).reset_index()
+
+        st.subheader("Resumen Total de Líneas por Responsable y Estado")
+        st.dataframe(pivot_resp_estado, use_container_width=True)
+
+else:
+    st.error("El archivo ORDENES.xlsx no fue encontrado en el ZIP.")
