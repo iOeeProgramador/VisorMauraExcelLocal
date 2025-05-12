@@ -92,6 +92,12 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                             output_excel = io.BytesIO()
                             with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
                                 df_responsable.to_excel(writer, index=False, sheet_name="Datos")
+                            worksheet = writer.sheets["Datos"]
+                            unlocked_format = writer.book.add_format({"locked": False})
+                            for idx, col in enumerate(df_responsable.columns):
+                                if col in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
+                                    worksheet.set_column(idx, idx, None, unlocked_format)
+                            worksheet.protect("", options={"format_cells": False})
                             output_excel.seek(0)
                             safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', str(responsable))
                             safe_name = f"{safe_name}_{datetime.today().strftime('%Y%m%d')}"
