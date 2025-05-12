@@ -68,7 +68,8 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 resumen = resumen.sort_values(by="Total Líneas", ascending=False)
                 total = resumen["Total Líneas"].sum()
                 with tab2:
-                    st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
+        st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
+        st.dataframe(resumen, use_container_width=True)
         st.dataframe(resumen, use_container_width=True)
 
             if "RESPONSABLE_GESTION" in df_combinado.columns and "ESTADO_ESTADO" in df_combinado.columns:
@@ -80,7 +81,8 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 ).reset_index()
 
                 with tab3:
-                    st.subheader("Resumen Total de Líneas por Responsable y Estado")
+        st.subheader("Resumen Total de Líneas por Responsable y Estado")
+        st.dataframe(pivot_resp_estado, use_container_width=True)
         st.dataframe(pivot_resp_estado, use_container_width=True)
 
                 if 'zip_responsables' not in st.session_state:
@@ -90,7 +92,8 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 
                 
                 with tab1:
-                    st.subheader("Vista previa de DatosCombinados.xlsx")
+        st.subheader("Vista previa de DatosCombinados.xlsx")
+        st.dataframe(df_combinado, use_container_width=True)
         st.dataframe(df_combinado, use_container_width=True)
 
     output = io.BytesIO()
