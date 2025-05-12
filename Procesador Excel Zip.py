@@ -91,7 +91,7 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
                     df_responsable.to_excel(writer, index=False, sheet_name="Datos")
                 output_excel.seek(0)
-                safe_name = str(responsable).replace("/", "-").replace("\", "-")
+                safe_name = str(responsable).replace("/", "-").replace("\\", "-")
                 zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
 
         zip_buffer.seek(0)
