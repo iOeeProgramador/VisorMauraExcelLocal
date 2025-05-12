@@ -64,18 +64,18 @@ if uploaded_file is not None:
                 st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
                 st.dataframe(resumen, use_container_width=True)
 
-                # Resumen cruzado: Responsable por Tipo de Estado
-                if "Tipo Estado_ESTADO" in df_combinado.columns:
-                    resumen_estado = df_combinado.groupby([
-                        "RESPONSABLE_GESTION", "Tipo Estado_ESTADO"], dropna=False
-                    ).size().reset_index(name="Total Líneas")
+            # Resumen cruzado: Responsable por Tipo de Estado
+            if "RESPONSABLE_GESTION" in df_combinado.columns and "Tipo Estado_ESTADO" in df_combinado.columns:
+                resumen_estado = df_combinado.groupby(
+                    ["RESPONSABLE_GESTION", "Tipo Estado_ESTADO"], dropna=False
+                ).size().reset_index(name="Total Líneas")
 
-                    resumen_estado["RESPONSABLE_GESTION"] = resumen_estado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
-                    resumen_estado["Tipo Estado_ESTADO"] = resumen_estado["Tipo Estado_ESTADO"].fillna("SIN ESTADO")
-                    resumen_estado = resumen_estado.sort_values(by=["RESPONSABLE_GESTION", "Total Líneas"], ascending=[True, False])
+                resumen_estado["RESPONSABLE_GESTION"] = resumen_estado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
+                resumen_estado["Tipo Estado_ESTADO"] = resumen_estado["Tipo Estado_ESTADO"].fillna("SIN ESTADO")
+                resumen_estado = resumen_estado.sort_values(by=["RESPONSABLE_GESTION", "Total Líneas"], ascending=[True, False])
 
-                    st.subheader("Resumen de Líneas por Responsable y Tipo de Estado")
-                    st.dataframe(resumen_estado, use_container_width=True)
+                st.subheader("Resumen de Líneas por Responsable y Tipo de Estado")
+                st.dataframe(resumen_estado, use_container_width=True)
 
             st.subheader("Vista previa de DatosCombinados.xlsx")
             st.dataframe(df_combinado, use_container_width=True)
