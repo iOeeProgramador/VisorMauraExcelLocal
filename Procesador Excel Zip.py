@@ -92,7 +92,7 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
             output.seek(0)
 
             if uploaded_file is not None:
-            st.download_button(
+                st.download_button(
                 label="Salir y descargar DatosCombinados.xlsx",
                 data=output,
                 file_name="DatosCombinados.xlsx",
