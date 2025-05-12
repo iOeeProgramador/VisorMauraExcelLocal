@@ -63,13 +63,13 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 df_combinado = pd.merge(df_combinado, df_gestion_unique, left_on="HNAME_ORDENES", right_on="HNAME_GESTION", how="left")
 
             if "RESPONSABLE_GESTION" in df_combinado.columns:
-    resumen = df_combinado.groupby("RESPONSABLE_GESTION", dropna=False).size().reset_index(name="Total Líneas")
-    resumen["RESPONSABLE_GESTION"] = resumen["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
-    resumen = resumen.sort_values(by="Total Líneas", ascending=False)
-    total = resumen["Total Líneas"].sum()
-    with tab2:
-        st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
-        st.dataframe(resumen, use_container_width=True)
+            resumen = df_combinado.groupby("RESPONSABLE_GESTION", dropna=False).size().reset_index(name="Total Líneas")
+                resumen["RESPONSABLE_GESTION"] = resumen["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
+                resumen = resumen.sort_values(by="Total Líneas", ascending=False)
+                total = resumen["Total Líneas"].sum()
+                with tab2:
+                st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
+                st.dataframe(resumen, use_container_width=True)
 if "RESPONSABLE_GESTION" in df_combinado.columns and "ESTADO_ESTADO" in df_combinado.columns:
     pivot_resp_estado = df_combinado.pivot_table(
         index="RESPONSABLE_GESTION",
