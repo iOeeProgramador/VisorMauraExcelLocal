@@ -98,7 +98,7 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-        elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
+elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
     df_combinado = pd.read_excel(uploaded_file)
 
     st.subheader("Vista previa de DatosCombinados.xlsx")
@@ -123,5 +123,5 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
         st.subheader("Resumen Total de Líneas por Responsable y Estado")
         st.dataframe(pivot_resp_estado, use_container_width=True)
 
-    else:
+else:
     st.error("El archivo ORDENES.xlsx no fue encontrado en el ZIP.")
