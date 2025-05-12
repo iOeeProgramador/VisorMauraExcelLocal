@@ -102,23 +102,23 @@ if st.button("Generar ZIP por Responsable"):
     st.session_state.zip_responsables = zip_buffer.getvalue()
     st.success("ZIP por responsable generado correctamente.")
 
-if st.session_state.zip_responsables:
-    st.download_button(
-        label="Descargar ZIP con Datos por Responsable",
+    if st.session_state.zip_responsables:
+            st.download_button(
+            label="Descargar ZIP con Datos por Responsable",
         data=st.session_state.zip_responsables,
         file_name="DatosPorResponsable.zip",
         mime="application/zip"
     )
 
-            st.subheader("Vista previa de DatosCombinados.xlsx")
-            st.dataframe(df_combinado, use_container_width=True)
+                st.subheader("Vista previa de DatosCombinados.xlsx")
+    st.dataframe(df_combinado, use_container_width=True)
 
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                df_combinado.to_excel(writer, index=False, sheet_name='Datos')
-            output.seek(0)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df_combinado.to_excel(writer, index=False, sheet_name='Datos')
+    output.seek(0)
 
-            st.download_button(
+    st.download_button(
                 label="Salir y descargar DatosCombinados.xlsx",
                 data=output,
                 file_name="DatosCombinados.xlsx",
