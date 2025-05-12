@@ -3,7 +3,6 @@ import pandas as pd
 import zipfile
 import io
 from datetime import datetime
-from email_sender_gmail import enviar_mails
 
 st.set_page_config(layout="wide")
 st.title("Procesador de archivos MIA")
@@ -23,7 +22,8 @@ if uploaded_file is not None:
 
             if "LRDTE_ORDENES" in df_ordenes.columns:
                 today = datetime.today()
-                df_ordenes.insert(0, "CONTROL_DIAS", df_ordenes["LRDTE_ORDENES"].apply(lambda x: (datetime.strptime(str(int(x)), "%Y%m%d") - today).days))
+                df_ordenes.insert(0, "CONTROL_DIAS", df_ordenes["LRDTE_ORDENES"].apply(
+                    lambda x: (datetime.strptime(str(int(x)), "%Y%m%d") - today).days))
 
             if "INVENTARIO.xlsx" in file_dict:
                 df_inventario = pd.read_excel(file_dict["INVENTARIO.xlsx"])
