@@ -66,19 +66,17 @@ if uploaded_file is not None:
 
             # Resumen Total de Líneas por Responsable y Estado
             if "RESPONSABLE_GESTION" in df_combinado.columns and "ESTADO_ESTADO" in df_combinado.columns:
-                resumen_resp_estado = df_combinado.groupby(
-                    ["RESPONSABLE_GESTION", "ESTADO_ESTADO"], dropna=False
-                ).size().reset_index(name="Total Líneas")
-
-                resumen_resp_estado["RESPONSABLE_GESTION"] = resumen_resp_estado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
-                resumen_resp_estado["ESTADO_ESTADO"] = resumen_resp_estado["ESTADO_ESTADO"].fillna("SIN ESTADO")
-                resumen_resp_estado = resumen_resp_estado.sort_values(by=["RESPONSABLE_GESTION", "Total Líneas"], ascending=[True, False])
+                pivot_resp_estado = df_combinado.pivot_table(
+                    index="RESPONSABLE_GESTION",
+                    columns="ESTADO_ESTADO",
+                    aggfunc="size",
+                    fill_value=0
+                ).reset_index()
 
                 st.subheader("Resumen Total de Líneas por Responsable y Estado")
-                st.dataframe(resumen_resp_estado, use_container_width=True)
+                st.dataframe(pivot_resp_estado, use_container_width=True)
 
-            st.write("🧪 Columnas disponibles en df_combinado:")
-            st.write(df_combinado.columns.tolist())
+            
 
             st.subheader("Vista previa de DatosCombinados.xlsx")
             st.dataframe(df_combinado, use_container_width=True)
