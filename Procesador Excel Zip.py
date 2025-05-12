@@ -71,15 +71,15 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
 
             # Resumen Total de Líneas por Responsable y Estado
             if "RESPONSABLE_GESTION" in df_combinado.columns and "ESTADO_ESTADO" in df_combinado.columns:
-                pivot_resp_estado = df_combinado.pivot_table(
-                    index="RESPONSABLE_GESTION",
-                    columns="ESTADO_ESTADO",
-                    aggfunc="size",
-                    fill_value=0
-                ).reset_index()
+    pivot_resp_estado = df_combinado.pivot_table(
+        index="RESPONSABLE_GESTION",
+        columns="ESTADO_ESTADO",
+        aggfunc="size",
+        fill_value=0
+    ).reset_index()
 
-                st.subheader("Resumen Total de Líneas por Responsable y Estado")
-                st.dataframe(pivot_resp_estado, use_container_width=True)
+    st.subheader("Resumen Total de Líneas por Responsable y Estado")
+    st.dataframe(pivot_resp_estado, use_container_width=True)
 
     if st.button("Generar ZIP por Responsable"):
         zip_buffer = io.BytesIO()
@@ -91,11 +91,18 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
                     df_responsable.to_excel(writer, index=False, sheet_name="Datos")
                 output_excel.seek(0)
-                safe_name = str(responsable).replace("/", "-").replace("\\", "-")
+                safe_name = f"{str(responsable).replace('/', '-').replace('\\', '-')}_{datetime.today().strftime('%Y%m%d')}"
                 zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
 
         zip_buffer.seek(0)
         st.download_button(
+            label="Descargar ZIP con Datos por Responsable",
+            data=zip_buffer,
+            file_name="DatosPorResponsable.zip",
+            mime="application/zip"
+        )
+
+    
             label="Descargar ZIP con Datos por Responsable",
             data=zip_buffer,
             file_name="DatosPorResponsable.zip",
