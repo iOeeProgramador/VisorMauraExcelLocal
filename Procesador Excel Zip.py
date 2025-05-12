@@ -77,7 +77,10 @@ if uploaded_file is not None:
                 st.subheader("Resumen de Líneas por Responsable y Tipo de Estado")
                 st.dataframe(resumen_estado, use_container_width=True)
 
-            st.subheader("Vista previa de DatosCombinados.xlsx")
+            st.write("🧪 Columnas disponibles en df_combinado:")
+st.write(df_combinado.columns.tolist())
+
+st.subheader("Vista previa de DatosCombinados.xlsx")
             st.dataframe(df_combinado, use_container_width=True)
 
             output = io.BytesIO()
