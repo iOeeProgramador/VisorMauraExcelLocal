@@ -177,7 +177,9 @@ elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
     st.info("También puedes cargar un archivo Excel de un Responsable para actualizar DatosCombinados")
     update_file = st.file_uploader("Cargar archivo de Responsable actualizado", type="xlsx", key="update")
 
-    if update_file:
+    df_combinado = pd.read_excel(uploaded_file)
+
+if update_file:
         df_update = pd.read_excel(update_file)
 
         # Guardar respaldo de DatosCombinados antes de actualizar
@@ -204,7 +206,7 @@ elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
 
             df_combinado.reset_index(inplace=True)
             st.success("Datos actualizados correctamente desde el archivo del responsable.")
-    df_combinado = pd.read_excel(uploaded_file)
+    
     tab1, tab2, tab3 = st.tabs(["Vista previa", "Resumen por Responsable", "Resumen por Estado"])
 
     with tab1:
