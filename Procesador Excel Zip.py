@@ -128,67 +128,34 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 )
 
                 if st.button("Generar ZIP por Responsable"):
-                    zip_buffer = io.BytesIO()
-                    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
-                        responsables = df_combinado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE").unique()
-                        for responsable in responsables:
-                            df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
-                            output_excel = io.BytesIO()
-                            with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
-                                df_responsable.to_excel(writer, index=False, sheet_name="Datos")
-                                worksheet = writer.sheets["Datos"]
-                                for col_num, _ in enumerate(df_responsable.columns):
-                                    worksheet.set_column(col_num, col_num, 20, writer.book.add_format({"align": "center", "valign": "vcenter"}))
-                                worksheet.autofilter(0, 0, len(df_responsable), len(df_responsable.columns) - 1)
-                                worksheet = writer.sheets["Datos"]
-                                workbook = writer.book
-                                unlocked_format = workbook.add_format({"locked": False})
-                                locked_red_format = workbook.add_format({"locked": True, "bg_color": "#F4CCCC"})
-                                for col_idx, col_name in enumerate(df_responsable.columns):
-                                    col_letter = chr(65 + col_idx)
-                                    col_range = f"{col_letter}2:{col_letter}{len(df_responsable)+1}"
-                                    if col_name in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
-                                        worksheet.write_blank(col_range, None, unlocked_format)
-                                        worksheet.set_column(col_idx, col_idx, None, unlocked_format)
-                                    else:
-                                        worksheet.write_blank(col_range, None, locked_red_format)
-                                        worksheet.set_column(col_idx, col_idx, None, locked_red_format)
-                                worksheet.protect("", options={"format_cells": True, "sort": True, "autofilter": True})
-                            worksheet = writer.sheets["Datos"]
-                            workbook = writer.book
-                            unlocked_format = workbook.add_format({"locked": False})
-                            locked_red_format = workbook.add_format({"locked": True, "bg_color": "#F4CCCC"})
-                            for col_idx, col_name in enumerate(df_responsable.columns):
-                                col_letter = chr(65 + col_idx)
-                                col_range = f"{col_letter}2:{col_letter}{len(df_responsable)+1}"
-                                if col_name in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
-                                    worksheet.set_column(col_idx, col_idx, None, unlocked_format)
-                                else:
-                                    worksheet.set_column(col_idx, col_idx, None, locked_red_format)
-                            worksheet.protect("", options={"format_cells": False})
-                            worksheet = writer.sheets["Datos"]
-                            unlocked_format = writer.book.add_format({"locked": False})
-                            locked_red = writer.book.add_format({"locked": True, "bg_color": "#F4CCCC"})
-                            for idx, col in enumerate(df_responsable.columns):
-                                if col in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
-                                    worksheet.set_column(idx, idx, None, unlocked_format)
-                                else:
-                                    worksheet.set_column(idx, idx, None, locked_red)
-                            worksheet.protect("", options={"format_cells": False})
-                            worksheet = writer.sheets["Datos"]
-                            unlocked_format = writer.book.add_format({"locked": False})
-                            for idx, col in enumerate(df_responsable.columns):
-                                if col in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
-                                    worksheet.set_column(idx, idx, None, unlocked_format)
-                            worksheet.protect("", options={"format_cells": False})
-                            output_excel.seek(0)
-                            safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', str(responsable))
-                            safe_name = f"{safe_name}_{datetime.today().strftime('%Y%m%d')}"
-                            zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
-
-                    zip_buffer.seek(0)
-                    st.success("ZIP por Responsable generado con éxito")
-                    st.download_button(
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        responsables = df_combinado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE").unique()
+        for responsable in responsables:
+            df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
+            output_excel = io.BytesIO()
+            with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
+                        df_responsable.to_excel(writer, index=False, sheet_name="Datos")
+                        worksheet = writer.sheets["Datos"]
+                        for col_num, _ in enumerate(df_responsable.columns):
+                            worksheet.set_column(col_num, col_num, 20, writer.book.add_format({"align": "center", "valign": "vcenter"}))
+                        worksheet.autofilter(0, 0, len(df_responsable), len(df_responsable.columns) - 1)
+                worksheet = writer.sheets["Datos"]
+                for col_num, _ in enumerate(df_responsable.columns):
+                    worksheet.set_column(col_num, col_num, 20, writer.book.add_format({"align": "center", "valign": "vcenter"}))
+                worksheet.autofilter(0, 0, len(df_responsable), len(df_responsable.columns) - 1)
+            output_excel.seek(0)
+            safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', str(responsable))
+            safe_name = f"{safe_name}_{datetime.today().strftime('%Y%m%d')}"
+            zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
+    zip_buffer.seek(0)
+    st.success("ZIP por Responsable generado con éxito")
+    st.download_button(
+        label="Descargar ZIP con Datos por Responsable",
+        data=zip_buffer,
+        file_name="DatosPorResponsable.zip",
+        mime="application/zip"
+    )
                         label="Descargar ZIP con Datos por Responsable",
                         data=zip_buffer,
                         file_name="DatosPorResponsable.zip",
