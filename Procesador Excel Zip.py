@@ -128,25 +128,25 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 )
 
                 if st.button("Generar ZIP por Responsable"):
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
-        responsables = df_combinado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE").unique()
-        for responsable in responsables:
-            df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
-            output_excel = io.BytesIO()
-            with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
-                df_responsable.to_excel(writer, index=False, sheet_name="Datos")
-                worksheet = writer.sheets["Datos"]
-                for col_num, _ in enumerate(df_responsable.columns):
-                    worksheet.set_column(col_num, col_num, 20, writer.book.add_format({"align": "center", "valign": "vcenter"}))
-                worksheet.autofilter(0, 0, len(df_responsable), len(df_responsable.columns) - 1)
-            output_excel.seek(0)
-            safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', str(responsable))
-            safe_name = f"{safe_name}_{datetime.today().strftime('%Y%m%d')}"
-            zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
-    zip_buffer.seek(0)
-    st.success("ZIP por Responsable generado con éxito")
-    st.download_button(
+                    zip_buffer = io.BytesIO()
+                    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
+                        responsables = df_combinado["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE").unique()
+                        for responsable in responsables:
+                            df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
+                            output_excel = io.BytesIO()
+                            with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
+                                df_responsable.to_excel(writer, index=False, sheet_name="Datos")
+                                worksheet = writer.sheets["Datos"]
+                                for col_num, _ in enumerate(df_responsable.columns):
+                                    worksheet.set_column(col_num, col_num, 20, writer.book.add_format({"align": "center", "valign": "vcenter"}))
+                                worksheet.autofilter(0, 0, len(df_responsable), len(df_responsable.columns) - 1)
+                            output_excel.seek(0)
+                            safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', str(responsable))
+                            safe_name = f"{safe_name}_{datetime.today().strftime('%Y%m%d')}"
+                            zipf.writestr(f"{safe_name}.xlsx", output_excel.read())
+                    zip_buffer.seek(0)
+                    st.success("ZIP por Responsable generado con éxito")
+                    st.download_button(
         label="Descargar ZIP con Datos por Responsable",
         data=zip_buffer,
         file_name="DatosPorResponsable.zip",
