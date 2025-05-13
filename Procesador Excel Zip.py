@@ -152,16 +152,6 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
         file_name="DatosPorResponsable.zip",
         mime="application/zip"
     )
-        label="Descargar ZIP con Datos por Responsable",
-        data=zip_buffer,
-        file_name="DatosPorResponsable.zip",
-        mime="application/zip"
-    )
-                        label="Descargar ZIP con Datos por Responsable",
-                        data=zip_buffer,
-                        file_name="DatosPorResponsable.zip",
-                        mime="application/zip"
-                    )
 
             if "RESPONSABLE_GESTION" in df_combinado.columns and not df_combinado.empty:
                 resumen = df_combinado.groupby("RESPONSABLE_GESTION", dropna=False).size().reset_index(name="Total Líneas")
