@@ -135,11 +135,7 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
             df_responsable = df_combinado[df_combinado["RESPONSABLE_GESTION"] == responsable]
             output_excel = io.BytesIO()
             with pd.ExcelWriter(output_excel, engine="xlsxwriter") as writer:
-                        df_responsable.to_excel(writer, index=False, sheet_name="Datos")
-                        worksheet = writer.sheets["Datos"]
-                        for col_num, _ in enumerate(df_responsable.columns):
-                            worksheet.set_column(col_num, col_num, 20, writer.book.add_format({"align": "center", "valign": "vcenter"}))
-                        worksheet.autofilter(0, 0, len(df_responsable), len(df_responsable.columns) - 1)
+                df_responsable.to_excel(writer, index=False, sheet_name="Datos")
                 worksheet = writer.sheets["Datos"]
                 for col_num, _ in enumerate(df_responsable.columns):
                     worksheet.set_column(col_num, col_num, 20, writer.book.add_format({"align": "center", "valign": "vcenter"}))
@@ -151,6 +147,11 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
     zip_buffer.seek(0)
     st.success("ZIP por Responsable generado con éxito")
     st.download_button(
+        label="Descargar ZIP con Datos por Responsable",
+        data=zip_buffer,
+        file_name="DatosPorResponsable.zip",
+        mime="application/zip"
+    )
         label="Descargar ZIP con Datos por Responsable",
         data=zip_buffer,
         file_name="DatosPorResponsable.zip",
