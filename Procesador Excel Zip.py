@@ -10,6 +10,8 @@ st.title("Procesador de archivos MIA")
 
 modo = st.radio("Selecciona el modo de operación:", ("Actualizar con ZIP", "Revisar DatosCombinados.xlsx", "Actualizar desde Responsable"))
 
+uploaded_file = None  # Garantiza que siempre esté definida, para evitar NameError más abajo
+
 st.write("✅ Cargando aplicación...")
 
 if modo == "Actualizar desde Responsable":
@@ -112,7 +114,12 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
 
             with tab1:
                 st.subheader("Vista previa de DatosCombinados.xlsx")
-                st.dataframe(df_combinado, use_container_width=True)
+                filtro = st.text_input("Filtrar por texto (cualquier columna):")
+                if filtro:
+                    df_filtrado = df_combinado[df_combinado.apply(lambda row: row.astype(str).str.contains(filtro, case=False).any(), axis=1)]
+                    st.dataframe(df_filtrado, use_container_width=True)
+                else:
+                    st.dataframe(df_combinado, use_container_width=True)
 
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -172,75 +179,3 @@ if uploaded_file is not None and modo == "Actualizar con ZIP":
                 with tab3:
                     st.subheader("Resumen Total de Líneas por Responsable y Estado")
                     st.dataframe(pivot_resp_estado, use_container_width=True)
-
-elif uploaded_file is not None and modo == "Revisar DatosCombinados.xlsx":
-    st.info("También puedes cargar un archivo Excel de un Responsable para actualizar DatosCombinados")
-    update_file = st.file_uploader("Cargar archivo de Responsable actualizado", type="xlsx", key="update")
-    df_combinado = pd.read_excel(uploaded_file)
-
-    if update_file:
-        df_update = pd.read_excel(update_file)
-
-        backup = io.BytesIO()
-        with pd.ExcelWriter(backup, engine='xlsxwriter') as writer:
-            df_combinado.to_excel(writer, index=False, sheet_name='Datos')
-        backup.seek(0)
-        st.download_button(
-            label="Descargar respaldo antes de la actualización",
-            data=backup,
-            file_name="Respaldo_DatosCombinados.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-
-        if "LORD_ORDENES" in df_update.columns and "LLINE_ORDENES" in df_update.columns:
-            df_update["KEY"] = df_update["LORD_ORDENES"].astype(str) + df_update["LLINE_ORDENES"].astype(str)
-            df_combinado["KEY"] = df_combinado["LORD_ORDENES"].astype(str) + df_combinado["LLINE_ORDENES"].astype(str)
-
-            df_combinado.set_index("KEY", inplace=True)
-            df_update.set_index("KEY", inplace=True)
-
-            for col in ["ESTADO_ESTADO", "OBSERVACION_ESTADO"]:
-                if col in df_update.columns:
-                    df_combinado.loc[df_update.index, col] = df_update[col]
-
-            df_combinado.reset_index(inplace=True)
-            st.success("Datos actualizados correctamente desde el archivo del responsable.")
-
-        tab1, tab2, tab3 = st.tabs(["Vista previa", "Resumen por Responsable", "Resumen por Estado"])
-
-        with tab1:
-            st.subheader("Vista previa de DatosCombinados.xlsx")
-            st.dataframe(df_combinado, use_container_width=True)
-
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                df_combinado.to_excel(writer, index=False, sheet_name='Datos')
-            output.seek(0)
-
-            st.success("Archivo DatosCombinados.xlsx generado con éxito")
-            st.download_button(
-                label="Descargar DatosCombinados.xlsx",
-                data=output,
-                file_name="DatosCombinados.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-
-        if "RESPONSABLE_GESTION" in df_combinado.columns and not df_combinado.empty:
-            resumen = df_combinado.groupby("RESPONSABLE_GESTION", dropna=False).size().reset_index(name="Total Líneas")
-            resumen["RESPONSABLE_GESTION"] = resumen["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
-            resumen = resumen.sort_values(by="Total Líneas", ascending=False)
-            total = resumen["Total Líneas"].sum()
-            with tab2:
-                st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
-                st.dataframe(resumen, use_container_width=True)
-
-        if "RESPONSABLE_GESTION" in df_combinado.columns and "ESTADO_ESTADO" in df_combinado.columns and not df_combinado.empty:
-            pivot_resp_estado = df_combinado.pivot_table(
-                index="RESPONSABLE_GESTION",
-                columns="ESTADO_ESTADO",
-                aggfunc="size",
-                fill_value=0
-            ).reset_index()
-            with tab3:
-                st.subheader("Resumen Total de Líneas por Responsable y Estado")
-                st.dataframe(pivot_resp_estado, use_container_width=True)
