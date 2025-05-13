@@ -63,6 +63,40 @@ if modo == "Actualizar con ZIP":
 elif modo == "Revisar DatosCombinados.xlsx":
     uploaded_file = st.file_uploader("Carga tu archivo Excel DatosCombinados.xlsx", type="xlsx")
 
+    if uploaded_file is not None:
+        df_combinado = pd.read_excel(uploaded_file)
+
+        tab1, tab2, tab3 = st.tabs(["Vista previa", "Resumen por Responsable", "Resumen por Estado"])
+
+        with tab1:
+            st.subheader("Vista previa de DatosCombinados.xlsx")
+            filtro = st.text_input("Filtrar por texto (cualquier columna):", key="filtro_revisar")
+            if filtro:
+                df_filtrado = df_combinado[df_combinado.apply(lambda row: row.astype(str).str.contains(filtro, case=False).any(), axis=1)]
+                st.dataframe(df_filtrado, use_container_width=True)
+            else:
+                st.dataframe(df_combinado, use_container_width=True)
+
+        if "RESPONSABLE_GESTION" in df_combinado.columns and not df_combinado.empty:
+            resumen = df_combinado.groupby("RESPONSABLE_GESTION", dropna=False).size().reset_index(name="Total Líneas")
+            resumen["RESPONSABLE_GESTION"] = resumen["RESPONSABLE_GESTION"].fillna("SIN RESPONSABLE")
+            resumen = resumen.sort_values(by="Total Líneas", ascending=False)
+            total = resumen["Total Líneas"].sum()
+            with tab2:
+                st.subheader(f"Resumen Total de Líneas por Responsable (Total: {total})")
+                st.dataframe(resumen, use_container_width=True)
+
+        if "RESPONSABLE_GESTION" in df_combinado.columns and "ESTADO_ESTADO" in df_combinado.columns and not df_combinado.empty:
+            pivot_resp_estado = df_combinado.pivot_table(
+                index="RESPONSABLE_GESTION",
+                columns="ESTADO_ESTADO",
+                aggfunc="size",
+                fill_value=0
+            ).reset_index()
+            with tab3:
+                st.subheader("Resumen Total de Líneas por Responsable y Estado")
+                st.dataframe(pivot_resp_estado, use_container_width=True)
+
 if uploaded_file is not None and modo == "Actualizar con ZIP":
     if uploaded_file.size == 0:
         st.error("⚠️ El archivo ZIP está vacío.")
